@@ -26,12 +26,18 @@
           text-decoration: none;
         }
 
-        a:hover {
+        a:visited {
          color: #16d881;
           background-color: transparent;
           text-decoration: underline;
     }
 
+     a:hover {
+         color: #16d881;
+          background-color: transparent;
+          text-decoration: underline;
+    }
+        
     input[type=text] {
       border-radius: 25px;
       border: 1px solid #000000;    
@@ -141,8 +147,8 @@
             <button class="button button1">Login</button>
        </form>
 
-        <h4><a href="url">Forgot Username or Password.</a></h4>
-        <h4>Don't have an account? Make one <a href="url">here.</a></h4>
+        <h4><a href="auth/forgotauth">Forgot Username or Password.</a></h4>
+        <h4>Don't have an account? Make one <a href="/auth/createaccount">here.</a></h4>
 
      </div>
 
