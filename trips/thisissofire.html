@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>this is so fire</title>
+  <title>this is so fire V2</title>
+
   <style>
     html, body {
       margin: 0;
@@ -11,62 +12,138 @@
       height: 100%;
       overflow: hidden;
       background: black;
-      font-family: sans-serif;
+      font-family: system-ui, sans-serif;
     }
 
     .logo {
       position: absolute;
       width: 150px;
-      height: auto;
       user-select: none;
       pointer-events: none;
     }
 
-    #settings {
+    /* SETTINGS BUTTON */
+    #settingsToggle {
       position: fixed;
       top: 10px;
       left: 10px;
-      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      background: #111;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    /* SETTINGS PANEL */
+    #settings {
+      position: fixed;
+      top: 50px;
+      left: 10px;
+      width: 220px;
+      background: rgba(15, 15, 15, 0.9);
       color: white;
       padding: 12px;
       border-radius: 8px;
       z-index: 999;
+      overflow: hidden;
+      transition: max-height 0.3s ease, opacity 0.3s ease;
+      max-height: 0;
+      opacity: 0;
+      pointer-events: none;
     }
 
-    #settings input {
-      width: 100%;
-      margin-bottom: 6px;
+    #settings.open {
+      max-height: 300px;
+      opacity: 1;
+      pointer-events: auto;
     }
 
-    #settings button {
+    label {
+      display: block;
+      font-size: 13px;
+      margin-top: 10px;
+    }
+
+    input[type="text"] {
       width: 100%;
+      margin-top: 4px;
+      padding: 4px;
+      border-radius: 4px;
+      border: none;
+    }
+
+    input[type="range"] {
+      width: 100%;
+    }
+
+    .value {
+      font-size: 12px;
+      opacity: 0.8;
+      text-align: right;
+    }
+
+    #applyBtn {
+      margin-top: 12px;
+      width: 100%;
+      background: #ff4d4d;
+      border: none;
+      border-radius: 6px;
+      padding: 6px;
       cursor: pointer;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
 
-  <!-- SETTINGS MENU -->
+  <!-- TOGGLE -->
+  <button id="settingsToggle">☰ Settings</button>
+
+  <!-- SETTINGS -->
   <div id="settings">
     <label>
       Image filename
-      <input id="imageInput" type="text" value="fire.png" />
+      <input id="imageInput" type="text" value="fire.png">
     </label>
 
     <label>
       Speed
-      <input id="speedInput" type="number" value="10" min="1" />
+      <input id="speedInput" type="range" min="1" max="30" value="10">
+      <div class="value"><span id="speedValue">10</span></div>
     </label>
 
     <label>
       Amount of images
-      <input id="countInput" type="number" value="1" min="1" max="50" />
+      <input id="countInput" type="range" min="1" max="25" value="1">
+      <div class="value"><span id="countValue">1</span></div>
     </label>
 
     <button id="applyBtn">Apply</button>
   </div>
 
   <script>
+    const toggle = document.getElementById("settingsToggle");
+    const panel = document.getElementById("settings");
+
+    toggle.onclick = () => {
+      panel.classList.toggle("open");
+    };
+
+    const speedInput = document.getElementById("speedInput");
+    const countInput = document.getElementById("countInput");
+
+    const speedValue = document.getElementById("speedValue");
+    const countValue = document.getElementById("countValue");
+
+    speedValue.textContent = speedInput.value;
+    countValue.textContent = countInput.value;
+
+    speedInput.oninput = () => speedValue.textContent = speedInput.value;
+    countInput.oninput = () => countValue.textContent = countInput.value;
+
     let logos = [];
 
     function clearLogos() {
@@ -74,12 +151,12 @@
       logos = [];
     }
 
-    function createLogos(imageSrc, speed, count) {
+    function createLogos(src, speed, count) {
       clearLogos();
 
       for (let i = 0; i < count; i++) {
         const img = document.createElement("img");
-        img.src = imageSrc;
+        img.src = src;
         img.className = "logo";
         document.body.appendChild(img);
 
@@ -109,22 +186,22 @@
 
         l.el.style.transform = `translate(${l.x}px, ${l.y}px)`;
       }
-
       requestAnimationFrame(animate);
     }
 
     document.getElementById("applyBtn").onclick = () => {
-      const image = document.getElementById("imageInput").value;
-      const speed = Number(document.getElementById("speedInput").value);
-      const count = Number(document.getElementById("countInput").value);
+      createLogos(
+        document.getElementById("imageInput").value,
+        Number(speedInput.value),
+        Number(countInput.value)
+      );
 
-      createLogos(image, speed, count);
+      // auto-collapse after applying
+      panel.classList.remove("open");
     };
 
-    // start default
     createLogos("fire.png", 10, 1);
     animate();
   </script>
-
 </body>
 </html>
