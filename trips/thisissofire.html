@@ -20,6 +20,7 @@
       width: 150px;
       user-select: none;
       pointer-events: none;
+      will-change: transform;
     }
 
     /* SETTINGS BUTTON */
@@ -42,7 +43,7 @@
       position: fixed;
       top: 50px;
       left: 10px;
-      width: 230px;
+      width: 240px;
       background: rgba(15, 15, 15, 0.9);
       color: white;
       padding: 12px;
@@ -56,7 +57,7 @@
     }
 
     #settings.open {
-      max-height: 400px;
+      max-height: 420px;
       opacity: 1;
       pointer-events: auto;
     }
@@ -117,7 +118,7 @@
     <label>Amount of images</label>
     <div class="row">
       <input id="countRange" type="range" min="1" max="50" value="1">
-      <input id="countNumber" type="number" min="1" max="50" value="1">
+      <input id="countNumber" type="number" min="1" value="1">
     </div>
 
     <button id="applyBtn">Apply</button>
@@ -125,15 +126,19 @@
 
   <script>
     const panel = document.getElementById("settings");
-    document.getElementById("settingsToggle").onclick = () =>
-      panel.classList.toggle("open");
+    const toggle = document.getElementById("settingsToggle");
 
-    // Sync sliders + numbers
+    toggle.onclick = () => panel.classList.toggle("open");
+
+    // Sync slider + number (number can exceed slider max)
     function link(range, number) {
       range.oninput = () => number.value = range.value;
+
       number.oninput = () => {
-        number.value = Math.max(range.min, Math.min(range.max, number.value));
-        range.value = number.value;
+        if (number.value < 1) number.value = 1;
+        if (Number(number.value) <= Number(range.max)) {
+          range.value = number.value;
+        }
       };
     }
 
@@ -196,6 +201,7 @@
 
         l.el.style.transform = `translate(${l.x}px, ${l.y}px)`;
       }
+
       requestAnimationFrame(animate);
     }
 
@@ -208,6 +214,7 @@
       panel.classList.remove("open");
     };
 
+    // Start default
     createLogos("fire.png", 10, 1);
     animate();
   </script>
