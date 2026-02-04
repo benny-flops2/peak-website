@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>this is so fire V2</title>
+  <title>this is so fire</title>
 
   <style>
     html, body {
@@ -42,7 +42,7 @@
       position: fixed;
       top: 50px;
       left: 10px;
-      width: 220px;
+      width: 230px;
       background: rgba(15, 15, 15, 0.9);
       color: white;
       padding: 12px;
@@ -56,7 +56,7 @@
     }
 
     #settings.open {
-      max-height: 300px;
+      max-height: 400px;
       opacity: 1;
       pointer-events: auto;
     }
@@ -67,7 +67,8 @@
       margin-top: 10px;
     }
 
-    input[type="text"] {
+    input[type="text"],
+    input[type="number"] {
       width: 100%;
       margin-top: 4px;
       padding: 4px;
@@ -75,23 +76,23 @@
       border: none;
     }
 
-    input[type="range"] {
-      width: 100%;
+    .row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
     }
 
-    .value {
-      font-size: 12px;
-      opacity: 0.8;
-      text-align: right;
+    input[type="range"] {
+      flex: 1;
     }
 
     #applyBtn {
-      margin-top: 12px;
+      margin-top: 14px;
       width: 100%;
       background: #ff4d4d;
       border: none;
       border-radius: 6px;
-      padding: 6px;
+      padding: 7px;
       cursor: pointer;
       font-weight: bold;
     }
@@ -99,50 +100,45 @@
 </head>
 <body>
 
-  <!-- TOGGLE -->
   <button id="settingsToggle">☰ Settings</button>
 
-  <!-- SETTINGS -->
   <div id="settings">
     <label>
       Image filename
       <input id="imageInput" type="text" value="fire.png">
     </label>
 
-    <label>
-      Speed
-      <input id="speedInput" type="range" min="1" max="30" value="10">
-      <div class="value"><span id="speedValue">10</span></div>
-    </label>
+    <label>Speed</label>
+    <div class="row">
+      <input id="speedRange" type="range" min="1" max="30" value="10">
+      <input id="speedNumber" type="number" min="1" max="30" value="10">
+    </div>
 
-    <label>
-      Amount of images
-      <input id="countInput" type="range" min="1" max="25" value="1">
-      <div class="value"><span id="countValue">1</span></div>
-    </label>
+    <label>Amount of images</label>
+    <div class="row">
+      <input id="countRange" type="range" min="1" max="50" value="1">
+      <input id="countNumber" type="number" min="1" max="50" value="1">
+    </div>
 
     <button id="applyBtn">Apply</button>
   </div>
 
   <script>
-    const toggle = document.getElementById("settingsToggle");
     const panel = document.getElementById("settings");
-
-    toggle.onclick = () => {
+    document.getElementById("settingsToggle").onclick = () =>
       panel.classList.toggle("open");
-    };
 
-    const speedInput = document.getElementById("speedInput");
-    const countInput = document.getElementById("countInput");
+    // Sync sliders + numbers
+    function link(range, number) {
+      range.oninput = () => number.value = range.value;
+      number.oninput = () => {
+        number.value = Math.max(range.min, Math.min(range.max, number.value));
+        range.value = number.value;
+      };
+    }
 
-    const speedValue = document.getElementById("speedValue");
-    const countValue = document.getElementById("countValue");
-
-    speedValue.textContent = speedInput.value;
-    countValue.textContent = countInput.value;
-
-    speedInput.oninput = () => speedValue.textContent = speedInput.value;
-    countInput.oninput = () => countValue.textContent = countInput.value;
+    link(speedRange, speedNumber);
+    link(countRange, countNumber);
 
     let logos = [];
 
@@ -155,18 +151,30 @@
       clearLogos();
 
       for (let i = 0; i < count; i++) {
-        const img = document.createElement("img");
+        const img = new Image();
         img.src = src;
         img.className = "logo";
-        document.body.appendChild(img);
 
-        logos.push({
-          el: img,
-          x: Math.random() * window.innerWidth,
-          y: Math.random() * window.innerHeight,
-          vx: (Math.random() < 0.5 ? -1 : 1) * speed,
-          vy: (Math.random() < 0.5 ? -1 : 1) * speed
-        });
+        img.onload = () => {
+          const w = img.offsetWidth;
+          const h = img.offsetHeight;
+
+          const maxX = window.innerWidth - w;
+          const maxY = window.innerHeight - h;
+
+          const x = Math.random() * maxX;
+          const y = Math.random() * maxY;
+
+          document.body.appendChild(img);
+
+          logos.push({
+            el: img,
+            x,
+            y,
+            vx: (Math.random() < 0.5 ? -1 : 1) * speed,
+            vy: (Math.random() < 0.5 ? -1 : 1) * speed
+          });
+        };
       }
     }
 
@@ -181,8 +189,10 @@
         l.x += l.vx;
         l.y += l.vy;
 
-        if (l.x <= 0 || l.x >= maxX) l.vx *= -1;
-        if (l.y <= 0 || l.y >= maxY) l.vy *= -1;
+        if (l.x <= 0) { l.x = 0; l.vx *= -1; }
+        if (l.x >= maxX) { l.x = maxX; l.vx *= -1; }
+        if (l.y <= 0) { l.y = 0; l.vy *= -1; }
+        if (l.y >= maxY) { l.y = maxY; l.vy *= -1; }
 
         l.el.style.transform = `translate(${l.x}px, ${l.y}px)`;
       }
@@ -191,17 +201,16 @@
 
     document.getElementById("applyBtn").onclick = () => {
       createLogos(
-        document.getElementById("imageInput").value,
-        Number(speedInput.value),
-        Number(countInput.value)
+        imageInput.value,
+        Number(speedNumber.value),
+        Number(countNumber.value)
       );
-
-      // auto-collapse after applying
       panel.classList.remove("open");
     };
 
     createLogos("fire.png", 10, 1);
     animate();
   </script>
+
 </body>
 </html>
