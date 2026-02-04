@@ -11,49 +11,120 @@
       height: 100%;
       overflow: hidden;
       background: black;
+      font-family: sans-serif;
     }
 
-    #logo {
+    .logo {
       position: absolute;
       width: 150px;
       height: auto;
       user-select: none;
       pointer-events: none;
     }
+
+    #settings {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 12px;
+      border-radius: 8px;
+      z-index: 999;
+    }
+
+    #settings input {
+      width: 100%;
+      margin-bottom: 6px;
+    }
+
+    #settings button {
+      width: 100%;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
-  <!-- Replace src with your own image -->
-  <img id="logo" src="fire.png" alt="DVD Logo" />
+
+  <!-- SETTINGS MENU -->
+  <div id="settings">
+    <label>
+      Image filename
+      <input id="imageInput" type="text" value="fire.png" />
+    </label>
+
+    <label>
+      Speed
+      <input id="speedInput" type="number" value="10" min="1" />
+    </label>
+
+    <label>
+      Amount of images
+      <input id="countInput" type="number" value="1" min="1" max="50" />
+    </label>
+
+    <button id="applyBtn">Apply</button>
+  </div>
 
   <script>
-    const logo = document.getElementById("logo");
+    let logos = [];
 
-    let x = 0;
-    let y = 0;
-    let vx = 30;
-    let vy = 25;
+    function clearLogos() {
+      logos.forEach(l => l.el.remove());
+      logos = [];
+    }
+
+    function createLogos(imageSrc, speed, count) {
+      clearLogos();
+
+      for (let i = 0; i < count; i++) {
+        const img = document.createElement("img");
+        img.src = imageSrc;
+        img.className = "logo";
+        document.body.appendChild(img);
+
+        logos.push({
+          el: img,
+          x: Math.random() * window.innerWidth,
+          y: Math.random() * window.innerHeight,
+          vx: (Math.random() < 0.5 ? -1 : 1) * speed,
+          vy: (Math.random() < 0.5 ? -1 : 1) * speed
+        });
+      }
+    }
 
     function animate() {
-      const logoWidth = logo.offsetWidth;
-      const logoHeight = logo.offsetHeight;
+      for (const l of logos) {
+        const w = l.el.offsetWidth;
+        const h = l.el.offsetHeight;
 
-      const maxX = window.innerWidth - logoWidth;
-      const maxY = window.innerHeight - logoHeight;
+        const maxX = window.innerWidth - w;
+        const maxY = window.innerHeight - h;
 
-      x += vx;
-      y += vy;
+        l.x += l.vx;
+        l.y += l.vy;
 
-      if (x <= 0 || x >= maxX) vx *= -1;
-      if (y <= 0 || y >= maxY) vy *= -1;
+        if (l.x <= 0 || l.x >= maxX) l.vx *= -1;
+        if (l.y <= 0 || l.y >= maxY) l.vy *= -1;
 
-      logo.style.transform = `translate(${x}px, ${y}px)`;
+        l.el.style.transform = `translate(${l.x}px, ${l.y}px)`;
+      }
 
       requestAnimationFrame(animate);
     }
 
-    // Start once image loads (important for correct sizing)
-    logo.onload = () => animate();
+    document.getElementById("applyBtn").onclick = () => {
+      const image = document.getElementById("imageInput").value;
+      const speed = Number(document.getElementById("speedInput").value);
+      const count = Number(document.getElementById("countInput").value);
+
+      createLogos(image, speed, count);
+    };
+
+    // start default
+    createLogos("fire.png", 10, 1);
+    animate();
   </script>
+
 </body>
 </html>
